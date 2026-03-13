@@ -9,14 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, X } from 'lucide-react';
-import { GroceryItem } from '@/api/groceryApi';
+import { createGroceryList, ProductDetail } from '@/api/groceryApi';
 
 const GroceryCreate = () => {
   const { products, setProducts, addGroceryList } = useAppStore();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [storeName, setStoreName] = useState('');
-  const [items, setItems] = useState<GroceryItem[]>([]);
+  const [items, setItems] = useState<ProductDetail[]>([]);
   const [selProduct, setSelProduct] = useState('');
 
   useEffect(() => {
@@ -24,23 +24,33 @@ const GroceryCreate = () => {
   }, []);
 
   const addItem = () => {
-    const prod = products.find((p) => p.id === selProduct);
+    const prod = products.find((p) => p._id === selProduct);
     if (!prod) { toast.error('Select a product'); return; }
-    if (items.find((i) => i.product_id === prod.id)) { toast.error('Already added'); return; }
-    setItems([...items, { product_id: prod.id, product_name: prod.name, quantity: prod.default_quantity, unit: prod.default_unit, assign_to: 'me', completed: false }]);
+    if (items.find((i) => i._id === prod._id)) { toast.error('Already added'); return; }
+    setItems([...items, { _id: prod._id, name: prod.name, description: prod.description, images: [], qty: prod.qty, unit: prod.unit }]);
     setSelProduct('');
   };
 
-  const removeItem = (pid: string) => setItems(items.filter((i) => i.product_id !== pid));
+  const removeItem = (pid: string) => setItems(items.filter((i) => i._id !== pid));
 
-  const updateItem = (pid: string, field: keyof GroceryItem, value: any) => {
-    setItems(items.map((i) => (i.product_id === pid ? { ...i, [field]: value } : i)));
+  const updateItem = (pid: string, field: keyof ProductDetail, value: any) => {
+    setItems(items.map((i) => (i._id === pid ? { ...i, [field]: value } : i)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) { toast.error('Name is required'); return; }
-    addGroceryList({ id: Date.now().toString(), name, store_name: storeName, items, converted_to_basket: false });
+    const newList = { 
+      _id: Date.now().toString(), 
+      listName: name, 
+      storeName: storeName, 
+      createdAt: new Date().toISOString(),
+      itemCount: items.length,
+      productDetails: items, 
+      converted_to_basket: false 
+    };
+    addGroceryList(newList);
+    await createGroceryList({ listName: name, storeName: storeName, createdAt: newList.createdAt, itemCount: newList.itemCount, productDetails: items });
     toast.success('Grocery list created! 🎉');
     navigate('/grocery-lists');
   };
@@ -71,7 +81,7 @@ const GroceryCreate = () => {
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Select product" /></SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -80,24 +90,17 @@ const GroceryCreate = () => {
 
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.product_id} className="bg-secondary rounded-xl p-3 space-y-2">
+                <div key={item._id} className="bg-secondary rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-foreground">{item.product_name}</span>
-                    <button type="button" onClick={() => removeItem(item.product_id)} className="text-destructive"><X className="w-4 h-4" /></button>
+                    <span className="font-semibold text-sm text-foreground">{item.name}</span>
+                    <button type="button" onClick={() => removeItem(item._id)} className="text-destructive"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input type="number" value={item.quantity} onChange={(e) => updateItem(item.product_id, 'quantity', Number(e.target.value))} className="text-sm" />
-                    <Select value={item.unit} onValueChange={(v) => updateItem(item.product_id, 'unit', v)}>
-                      <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input type="number" value={item.qty} onChange={(e) => updateItem(item._id, 'qty', Number(e.target.value))} className="text-sm" />
+                    <Select value={item.unit} onValueChange={(v) => updateItem(item._id, 'unit', v)}>
+                      <SelectTrigger className="text-sm border-none bg-background/50"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {['pcs', 'kg', 'ltr', 'bunch', 'loaf', 'pack'].map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Select value={item.assign_to} onValueChange={(v) => updateItem(item.product_id, 'assign_to', v)}>
-                      <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="me">Me</SelectItem>
-                        <SelectItem value="partner">Partner</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

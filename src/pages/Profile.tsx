@@ -20,7 +20,7 @@ const Profile = () => {
   }, []);
 
   const handleSelectPartner = async (p: Partner) => {
-    await selectPartnerApi(p.id);
+    await selectPartnerApi(p._id);
     setPartner(p);
     toast.success(`${p.name} is now your partner! 🤝`);
     setOpen(false);
@@ -60,7 +60,7 @@ const Profile = () => {
                 </DialogHeader>
                 <div className="space-y-2 mt-4">
                   {users.map((u) => (
-                    <button key={u.id} onClick={() => handleSelectPartner(u)}
+                    <button key={u._id} onClick={() => handleSelectPartner(u)}
                       className="w-full grocery-card-hover flex items-center gap-3 text-left">
                       <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
                         <span className="text-xl">👤</span>

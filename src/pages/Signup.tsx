@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Signup = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ const Signup = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirm) {
+    if (!name || !email || !mobile || !password || !confirm) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -27,7 +29,7 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      const res = await signupUser(email, password);
+      const res = await signupUser(name, email, password, mobile);
       setAuth(res.data.user, res.data.token);
       toast.success('Account created! 🎉');
       navigate('/dashboard');
@@ -49,8 +51,16 @@ const Signup = () => {
 
         <form onSubmit={handleSignup} className="grocery-card space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input id="name" type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mobile">Mobile Number</Label>
+            <Input id="mobile" type="tel" placeholder="9090909090" value={mobile} onChange={(e) => setMobile(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>

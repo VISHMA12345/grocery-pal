@@ -10,12 +10,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { updateProductDetails } from '@/api/productApi';
 
 const ProductEdit = () => {
-  const { id } = useParams<{ id: string }>();
+  const { _id } = useParams<{ _id: string }>();
   const { products, categories, setCategories, updateProduct } = useAppStore();
   const navigate = useNavigate();
-  const product = products.find((p) => p.id === id);
+  const product = products.find((p) => p._id === _id);
 
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -31,18 +32,19 @@ const ProductEdit = () => {
   useEffect(() => {
     if (product) {
       setName(product.name);
-      setCategoryId(product.category_id);
+      setCategoryId(product.categoryId);
       setDescription(product.description);
-      setQuantity(String(product.default_quantity));
-      setUnit(product.default_unit);
+      setQuantity(String(product.qty));
+      setUnit(product.unit);
       setPrice(product.price ? String(product.price) : '');
     }
   }, [product]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !name || !categoryId) { toast.error('Name and category required'); return; }
-    updateProduct(id, { name, category_id: categoryId, description, default_quantity: Number(quantity), default_unit: unit, price: price ? Number(price) : undefined });
+    if (!_id || !name || !categoryId) { toast.error('Name and category required'); return; }
+    updateProduct(_id, { name, categoryId, description, qty: Number(quantity), unit, price: price ? Number(price) : undefined });
+    await updateProductDetails(_id, { name, categoryId, description, qty: Number(quantity), unit, price: price ? Number(price) : undefined });
     toast.success('Product updated!');
     navigate('/products');
   };
@@ -66,7 +68,7 @@ const ProductEdit = () => {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>
+                  <SelectItem key={c._id} value={c._id}>{c.icon} {c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

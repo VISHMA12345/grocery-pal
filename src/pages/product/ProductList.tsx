@@ -17,12 +17,12 @@ const ProductList = () => {
     getCategories().then((res) => setCategories(res.data));
   }, []);
 
-  const getCategoryName = (catId: string) => categories.find((c) => c.id === catId)?.name || 'Unknown';
-  const getCategoryIcon = (catId: string) => categories.find((c) => c.id === catId)?.icon || '📦';
+  const getCategoryName = (catId: string) => categories.find((c) => c._id === catId)?.name || 'Unknown';
+  const getCategoryIcon = (catId: string) => categories.find((c) => c._id === catId)?.icon || '📦';
 
-  const handleDelete = async (id: string) => {
-    await deleteProductApi(id);
-    removeProduct(id);
+  const handleDelete = async (_id: string) => {
+    await deleteProductApi(_id);
+    removeProduct(_id);
     toast.success('Product deleted');
   };
 
@@ -35,18 +35,18 @@ const ProductList = () => {
 
         <div className="space-y-3">
           {products.map((prod) => (
-            <div key={prod.id} className="grocery-card flex items-center gap-3">
-              <span className="text-2xl">{getCategoryIcon(prod.category_id)}</span>
+            <div key={prod._id} className="grocery-card flex items-center gap-3">
+              <span className="text-2xl">{getCategoryIcon(prod.categoryId)}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-foreground">{prod.name}</p>
-                <p className="text-xs text-muted-foreground">{getCategoryName(prod.category_id)} • {prod.default_quantity} {prod.default_unit}</p>
-                {prod.price && <p className="text-sm font-semibold text-primary">${prod.price.toFixed(2)}</p>}
+                <p className="text-xs text-muted-foreground">{getCategoryName(prod.categoryId)} • {prod.qty} {prod.unit}</p>
+                {prod.price && <p className="text-sm font-semibold text-primary">₹{prod.price.toFixed(2)}</p>}
               </div>
               <div className="flex gap-1.5">
-                <button onClick={() => navigate(`/products/edit/${prod.id}`)} className="p-2 rounded-xl bg-secondary text-secondary-foreground hover:bg-accent transition-colors">
+                <button onClick={() => navigate(`/products/edit/${prod._id}`)} className="p-2 rounded-xl bg-secondary text-secondary-foreground hover:bg-accent transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
-                <button onClick={() => handleDelete(prod.id)} className="p-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                <button onClick={() => handleDelete(prod._id)} className="p-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

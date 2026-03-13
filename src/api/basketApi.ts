@@ -1,38 +1,54 @@
-import { GroceryItem } from './groceryApi';
+import axiosClient from './axiosClient';
+import { ProductDetail } from './groceryApi';
 
 export type BasketStatus = 'started' | 'completed' | 'cancelled';
 
 export interface Basket {
-  id: string;
-  grocery_id: string;
-  grocery_name: string;
-  store_name: string;
+  _id: string;
+  listName: string;
+  storeName: string;
   status: BasketStatus;
-  items: GroceryItem[];
+  productDetails: ProductDetail[];
+  itemCount: number;
+  createdAt?: string;
 }
 
 const dummyBaskets: Basket[] = [
   {
-    id: '1', grocery_id: '1', grocery_name: 'Weekly Shopping', store_name: 'FreshMart', status: 'started',
-    items: [
-      { product_id: '1', product_name: 'Apple', quantity: 6, unit: 'pcs', assign_to: 'me', completed: false },
-      { product_id: '4', product_name: 'Milk', quantity: 2, unit: 'ltr', assign_to: 'partner', completed: false },
+    _id: '1', listName: 'Weekly Shopping', storeName: 'FreshMart', status: 'started',
+    itemCount: 2,
+    productDetails: [
+      { _id: '1', name: 'Apple', description: 'Fresh red apples', images: [], qty: 6, unit: 'pcs' },
+      { _id: '4', name: 'Milk', description: 'Whole milk', images: [], qty: 2, unit: 'ltr' },
     ],
   },
 ];
 
-export const getBaskets = async (): Promise<{ data: Basket[] }> => {
-  return { data: dummyBaskets };
+
+// /api/groceries/convert/69ae71ec10348a27ae18f1a9
+
+
+export const getBaskets = async (payload: string): Promise<{ data: Basket[] }> => {
+  const res = await axiosClient.get(`/groceries?converted_to_basket=${payload}`);
+  return res.data;
+  // return { data: dummyBaskets };
 };
 
-export const getBasketById = async (id: string): Promise<{ data: Basket | undefined }> => {
-  return { data: dummyBaskets.find((b) => b.id === id) };
+export const getBasketById = async (_id: string): Promise<{ data: Basket | undefined }> => {
+  const res = await axiosClient.get(`/baskets/${_id}`);
+  return res.data;
+  // return { data: dummyBaskets.find((b) => b._id === _id) };
 };
 
-export const createBasket = async (groceryId: string, groceryName: string, storeName: string, items: GroceryItem[]): Promise<{ data: Basket }> => {
-  return { data: { id: Date.now().toString(), grocery_id: groceryId, grocery_name: groceryName, store_name: storeName, status: 'started', items } };
+export const createBasket = async (groceryId: string): Promise<{ data: Basket }> => {
+  const res = await axiosClient.post(`/groceries/convert/${groceryId}`);
+  return res.data;
+  // return { data: { _id: Date.now().toString(), grocery_id: groceryId, listName: groceryName, storeName: storeName, status: 'started', items } };
 };
 
-export const updateBasketStatus = async (id: string, status: BasketStatus): Promise<{ data: Basket }> => {
-  return { data: { id, grocery_id: '', grocery_name: '', store_name: '', status, items: [] } };
+export const updateBasketStatus = async (_id: string, status: BasketStatus): Promise<{ data: Basket }> => {
+  const res = await axiosClient.put(`/baskets/${_id}`, { status });
+  return res.data;
+  // return { data: { _id, grocery_id: '', listName: '', storeName: '', status, items: [] } };
 };
+

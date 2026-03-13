@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { Category } from '@/api/categoryApi';
 import { Product } from '@/api/productApi';
-import { GroceryList, GroceryItem } from '@/api/groceryApi';
+import { GroceryList, ProductDetail } from '@/api/groceryApi';
 import { Basket, BasketStatus } from '@/api/basketApi';
 import { Partner } from '@/api/partnerApi';
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
 }
@@ -26,28 +26,28 @@ interface AppState {
   categories: Category[];
   setCategories: (c: Category[]) => void;
   addCategory: (c: Category) => void;
-  updateCategory: (id: string, c: Partial<Category>) => void;
-  removeCategory: (id: string) => void;
+  updateCategory: (_id: string, c: Partial<Category>) => void;
+  removeCategory: (_id: string) => void;
 
   // Products
   products: Product[];
   setProducts: (p: Product[]) => void;
   addProduct: (p: Product) => void;
-  updateProduct: (id: string, p: Partial<Product>) => void;
-  removeProduct: (id: string) => void;
+  updateProduct: (_id: string, p: Partial<Product>) => void;
+  removeProduct: (_id: string) => void;
 
   // Grocery Lists
   groceryLists: GroceryList[];
   setGroceryLists: (g: GroceryList[]) => void;
   addGroceryList: (g: GroceryList) => void;
-  updateGroceryList: (id: string, g: Partial<GroceryList>) => void;
-  removeGroceryList: (id: string) => void;
+  updateGroceryList: (_id: string, g: Partial<GroceryList>) => void;
+  removeGroceryList: (_id: string) => void;
 
   // Baskets
   baskets: Basket[];
   setBaskets: (b: Basket[]) => void;
   addBasket: (b: Basket) => void;
-  updateBasketStatus: (id: string, status: BasketStatus) => void;
+  updateBasketStatus: (_id: string, status: BasketStatus) => void;
   toggleBasketItem: (basketId: string, productId: string) => void;
 }
 
@@ -69,31 +69,32 @@ export const useAppStore = create<AppState>((set) => ({
   categories: [],
   setCategories: (categories) => set({ categories }),
   addCategory: (c) => set((s) => ({ categories: [...s.categories, c] })),
-  updateCategory: (id, c) => set((s) => ({ categories: s.categories.map((cat) => (cat.id === id ? { ...cat, ...c } : cat)) })),
-  removeCategory: (id) => set((s) => ({ categories: s.categories.filter((c) => c.id !== id) })),
+  updateCategory: (_id, c) => set((s) => ({ categories: s.categories.map((cat) => (cat._id === _id ? { ...cat, ...c } : cat)) })),
+  removeCategory: (_id) => set((s) => ({ categories: s.categories.filter((c) => c._id !== _id) })),
 
   products: [],
   setProducts: (products) => set({ products }),
   addProduct: (p) => set((s) => ({ products: [...s.products, p] })),
-  updateProduct: (id, p) => set((s) => ({ products: s.products.map((prod) => (prod.id === id ? { ...prod, ...p } : prod)) })),
-  removeProduct: (id) => set((s) => ({ products: s.products.filter((p) => p.id !== id) })),
+  updateProduct: (_id, p) => set((s) => ({ products: s.products.map((prod) => (prod._id === _id ? { ...prod, ...p } : prod)) })),
+  removeProduct: (_id) => set((s) => ({ products: s.products.filter((p) => p._id !== _id) })),
 
   groceryLists: [],
   setGroceryLists: (groceryLists) => set({ groceryLists }),
   addGroceryList: (g) => set((s) => ({ groceryLists: [...s.groceryLists, g] })),
-  updateGroceryList: (id, g) => set((s) => ({ groceryLists: s.groceryLists.map((gl) => (gl.id === id ? { ...gl, ...g } : gl)) })),
-  removeGroceryList: (id) => set((s) => ({ groceryLists: s.groceryLists.filter((g) => g.id !== id) })),
+  updateGroceryList: (_id, g) => set((s) => ({ groceryLists: s.groceryLists.map((gl) => (gl._id === _id ? { ...gl, ...g } : gl)) })),
+  removeGroceryList: (_id) => set((s) => ({ groceryLists: s.groceryLists.filter((g) => g._id !== _id) })),
 
   baskets: [],
   setBaskets: (baskets) => set({ baskets }),
   addBasket: (b) => set((s) => ({ baskets: [...s.baskets, b] })),
-  updateBasketStatus: (id, status) => set((s) => ({ baskets: s.baskets.map((b) => (b.id === id ? { ...b, status } : b)) })),
+  updateBasketStatus: (_id, status) => set((s) => ({ baskets: s.baskets.map((b) => (b._id === _id ? { ...b, status } : b)) })),
   toggleBasketItem: (basketId, productId) =>
     set((s) => ({
       baskets: s.baskets.map((b) =>
-        b.id === basketId
-          ? { ...b, items: b.items.map((i) => (i.product_id === productId ? { ...i, completed: !i.completed } : i)) }
+        b._id === basketId
+          ? { ...b, productDetails: b.productDetails.map((i) => (i._id === productId ? { ...i } : i)) }
           : b
       ),
     })),
 }));
+
