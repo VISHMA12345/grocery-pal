@@ -20,6 +20,7 @@ import GroceryDetails from "./pages/grocery/GroceryDetails";
 import BasketPage from "./pages/basket/BasketPage";
 import BasketDetails from "./pages/basket/BasketDetails";
 import Profile from "./pages/Profile";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/baskets" element={<BasketPage />} />
           <Route path="/baskets/:_id" element={<BasketDetails />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/users" element={<Users />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

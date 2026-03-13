@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import MainLayout from '@/layouts/MainLayout';
 import { useAppStore } from '@/stores/appStore';
-import { getAllUsers, selectPartner as selectPartnerApi } from '@/api/partnerApi';
+import { getAllUsers, selectPartner as selectPartnerApi, partnerDetail, acceptPartner } from '@/api/partnerApi';
 import { Partner } from '@/api/partnerApi';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { LogOut, UserPlus, Users } from 'lucide-react';
+import { LogOut, UserPlus, Users, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -13,11 +13,33 @@ const Profile = () => {
   const { user, partner, setPartner, logout } = useAppStore();
   const navigate = useNavigate();
   const [users, setUsers] = useState<Partner[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<Partner[]>([]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     getAllUsers().then((res) => setUsers(res.data));
+    fetchIncomingRequests();
   }, []);
+
+  const fetchIncomingRequests = async () => {
+    try {
+      const res = await partnerDetail();
+      setIncomingRequests(res.data);
+    } catch (error) {
+      console.error('Failed to fetch requests', error);
+    }
+  };
+
+  const handleAcceptRequest = async (request: Partner) => {
+    try {
+      await acceptPartner(request._id);
+      setIncomingRequests(prev => prev.filter(r => r._id !== request._id));
+      setPartner(request);
+      toast.success(`Partner request accepted from ${request.name}!`);
+    } catch (error) {
+      toast.error('Failed to accept request');
+    }
+  };
 
   const handleSelectPartner = async (p: Partner) => {
     await selectPartnerApi(p._id);
@@ -86,6 +108,33 @@ const Profile = () => {
           ) : (
             <p className="text-sm text-muted-foreground">No partner added yet</p>
           )}
+        </div>
+
+        {/* Partner Requests */}
+        <div className="grocery-card">
+          <h3 className="font-bold text-foreground flex items-center gap-2 mb-3">
+            <Bell className="w-4 h-4" /> Partner Requests dddddd
+          </h3>
+          <div className="space-y-3">
+            {incomingRequests.length > 0 ? (
+              incomingRequests.map((req) => (
+                <div key={req._id} className="flex items-center justify-between bg-secondary/50 rounded-xl p-3 border border-border/50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm">👤</div>
+                    <div>
+                      <p className="text-sm font-semibold">{req.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{req.email}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={() => handleAcceptRequest(req)} className="h-8 px-3">
+                    Accept
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-2">No pending requests</p>
+            )}
+          </div>
         </div>
 
         {/* Logout */}
