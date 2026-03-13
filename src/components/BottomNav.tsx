@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBasket, ClipboardList, Grid3X3, User } from 'lucide-react';
+import { LayoutDashboard, ShoppingBasket, ClipboardList, Grid3X3, User, UserPlus } from 'lucide-react';
 
 const tabs = [
   { path: '/dashboard', label: 'Home', icon: LayoutDashboard },
   { path: '/baskets', label: 'Basket', icon: ShoppingBasket },
   { path: '/grocery-lists', label: 'Lists', icon: ClipboardList },
   { path: '/categories', label: 'Category', icon: Grid3X3 },
+  { path: '/users', label: 'Users', icon: UserPlus },
   { path: '/profile', label: 'Profile', icon: User },
 ];
 
