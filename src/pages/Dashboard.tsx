@@ -34,10 +34,10 @@ const Dashboard = () => {
               </div>
               <div className="flex-1">
                 <p className="font-bold text-foreground">Open purchase waiting!</p>
-                <p className="text-sm text-muted-foreground">{activeBasket.grocery_name}</p>
+                <p className="text-sm text-muted-foreground">{activeBasket.listName}</p>
               </div>
             </div>
-            <Button onClick={() => navigate(`/baskets/${activeBasket.id}`)} className="w-full">
+            <Button onClick={() => navigate(`/baskets/${activeBasket._id}`)} className="w-full">
               Go to Basket <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

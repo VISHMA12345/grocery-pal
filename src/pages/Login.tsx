@@ -23,6 +23,7 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await loginUser(email, password);
+      console.log(res, '------------------------------')
       setAuth(res.data.user, res.data.token);
       toast.success('Welcome back! 🎉');
       navigate('/dashboard');

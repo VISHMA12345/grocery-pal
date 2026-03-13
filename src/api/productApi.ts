@@ -1,38 +1,47 @@
 export interface Product {
-  id: string;
+  _id: string;
   name: string;
-  category_id: string;
+  categoryId: string;
   description: string;
-  default_quantity: number;
-  default_unit: string;
+  qty: number;
+  unit: string;
   price?: number;
 }
+import axiosClient from './axiosClient';
+
+
 
 const dummyProducts: Product[] = [
-  { id: '1', name: 'Apple', category_id: '1', description: 'Red apple', default_quantity: 6, default_unit: 'pcs', price: 2.5 },
-  { id: '2', name: 'Banana', category_id: '1', description: 'Yellow banana', default_quantity: 1, default_unit: 'bunch', price: 1.2 },
-  { id: '3', name: 'Broccoli', category_id: '2', description: 'Fresh broccoli', default_quantity: 1, default_unit: 'pcs', price: 3.0 },
-  { id: '4', name: 'Milk', category_id: '3', description: 'Whole milk', default_quantity: 1, default_unit: 'ltr', price: 4.5 },
-  { id: '5', name: 'Bread', category_id: '4', description: 'Whole wheat bread', default_quantity: 1, default_unit: 'loaf', price: 3.5 },
-  { id: '6', name: 'Chicken Breast', category_id: '6', description: 'Boneless chicken', default_quantity: 1, default_unit: 'kg', price: 12.0 },
+  { _id: '1', name: 'Apple', categoryId: '1', description: 'Red apple', qty: 6, unit: 'pcs', price: 2.5 },
+  { _id: '2', name: 'Banana', categoryId: '1', description: 'Yellow banana', qty: 1, unit: 'bunch', price: 1.2 },
+  { _id: '3', name: 'Broccoli', categoryId: '2', description: 'Fresh broccoli', qty: 1, unit: 'pcs', price: 3.0 },
+  { _id: '4', name: 'Milk', categoryId: '3', description: 'Whole milk', qty: 1, unit: 'ltr', price: 4.5 },
+  { _id: '5', name: 'Bread', categoryId: '4', description: 'Whole wheat bread', qty: 1, unit: 'loaf', price: 3.5 },
+  { _id: '6', name: 'Chicken Breast', categoryId: '6', description: 'Boneless chicken', qty: 1, unit: 'kg', price: 12.0 },
 ];
 
 export const getProducts = async (): Promise<{ data: Product[] }> => {
-  return { data: dummyProducts };
+  const res = await axiosClient.get('/products');
+  return res.data;
 };
 
-export const getProductById = async (id: string): Promise<{ data: Product | undefined }> => {
-  return { data: dummyProducts.find((p) => p.id === id) };
+export const getProductById = async (_id: string): Promise<{ data: Product | undefined }> => {
+  const res = await axiosClient.get(`/products/${_id}`);
+  return res.data;
 };
 
-export const createProduct = async (p: Omit<Product, 'id'>): Promise<{ data: Product }> => {
-  return { data: { ...p, id: Date.now().toString() } };
+export const createProduct = async (p: Omit<Product, '_id'>): Promise<{ data: Product }> => {
+  const res = await axiosClient.post('/products', p);
+  return res.data;
 };
 
-export const updateProduct = async (id: string, p: Partial<Product>): Promise<{ data: Product }> => {
-  return { data: { id, name: p.name || '', category_id: p.category_id || '', description: p.description || '', default_quantity: p.default_quantity || 1, default_unit: p.default_unit || 'pcs', price: p.price } };
+export const updateProductDetails = async (_id: string, p: Partial<Product>): Promise<{ data: Product }> => {
+  const res = await axiosClient.patch(`/products/${_id}`, p);
+  return res.data;
 };
 
-export const deleteProduct = async (id: string) => {
-  return { data: { success: true } };
+export const deleteProduct = async (_id: string) => {
+  const res = await axiosClient.delete(`/products/${_id}`);
+  return res.data;
 };
+

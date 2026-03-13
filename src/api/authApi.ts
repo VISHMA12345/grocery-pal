@@ -1,21 +1,15 @@
 import axiosClient from './axiosClient';
 
 export const loginUser = async (email: string, password: string) => {
-  // Dummy - in production: return axiosClient.post('/login', { email, password });
-  return {
-    data: {
-      token: 'dummy-jwt-token',
-      user: { id: '1', email, name: 'John Doe' },
-    },
-  };
+  return (await axiosClient.post('/auth/login', { email, password })).data
 };
 
-export const signupUser = async (email: string, password: string) => {
-  // Dummy - in production: return axiosClient.post('/signup', { email, password });
-  return {
-    data: {
-      token: 'dummy-jwt-token',
-      user: { id: '1', email, name: email.split('@')[0] },
-    },
-  };
+export const signupUser = async (name: string, email: string, password: string, phoneNumber: string) => {
+  return (await axiosClient.post('/users', {
+    name,
+    email,
+    phoneNumber,
+    password,
+    isActive: 1
+  })).data
 };

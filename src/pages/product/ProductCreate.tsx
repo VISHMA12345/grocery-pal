@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { createProduct } from '@/api/productApi';
 
 const ProductCreate = () => {
   const { categories, setCategories, addProduct } = useAppStore();
@@ -29,11 +30,12 @@ const ProductCreate = () => {
     e.preventDefault();
     if (!name || !categoryId) { toast.error('Name and category are required'); return; }
     const product = {
-      id: Date.now().toString(), name, category_id: categoryId, description,
-      default_quantity: Number(quantity), default_unit: unit,
+      _id: Date.now().toString(), name, categoryId, description,
+      qty: Number(quantity), unit,
       price: price ? Number(price) : undefined,
     };
     addProduct(product);
+    await createProduct(product);
     toast.success('Product created! 🎉');
     navigate('/products');
   };
@@ -55,7 +57,7 @@ const ProductCreate = () => {
               <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>
+                  <SelectItem key={c._id} value={c._id}>{c.icon} {c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

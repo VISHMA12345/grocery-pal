@@ -4,21 +4,26 @@ import { useAppStore } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingBasket } from 'lucide-react';
 import { toast } from 'sonner';
+import { convertToBasketWithId } from '@/api/groceryApi';
 
 const GroceryDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { _id } = useParams<{ _id: string }>();
   const { groceryLists, addBasket } = useAppStore();
   const navigate = useNavigate();
-  const gl = groceryLists.find((g) => g.id === id);
+  const gl = groceryLists.find((g) => g._id === _id);
 
   if (!gl) return <MainLayout title="Grocery Details"><p className="text-muted-foreground">Not found</p></MainLayout>;
 
-  const convertToBasket = () => {
+  const convertToBasket = async () => {
     addBasket({
-      id: Date.now().toString(), grocery_id: gl.id, grocery_name: gl.name,
-      store_name: gl.store_name, status: 'started',
-      items: gl.items.map((i) => ({ ...i, completed: false })),
+      _id: Date.now().toString(),
+      listName: gl.listName,
+      storeName: gl.storeName,
+      status: 'started',
+      productDetails: gl.productDetails || [],
+      itemCount: gl.itemCount || 0,
     });
+    await convertToBasketWithId(gl._id);
     toast.success('Converted to basket! 🧺');
     navigate('/baskets');
   };
@@ -31,16 +36,16 @@ const GroceryDetails = () => {
         </button>
 
         <div className="grocery-card">
-          <h2 className="text-xl font-bold text-foreground">{gl.name}</h2>
-          <p className="text-sm text-muted-foreground">🏪 {gl.store_name}</p>
+          <h2 className="text-xl font-bold text-foreground">{gl.listName}</h2>
+          <p className="text-sm text-muted-foreground">🏪 {gl.storeName}</p>
         </div>
 
         <div className="space-y-2">
-          {gl.items.map((item) => (
-            <div key={item.product_id} className="grocery-card flex items-center justify-between">
+          {gl.productDetails?.map((item) => (
+            <div key={item._id} className="grocery-card flex items-center justify-between">
               <div>
-                <p className="font-semibold text-foreground">{item.product_name}</p>
-                <p className="text-xs text-muted-foreground">{item.quantity} {item.unit} • Assigned to: {item.assign_to === 'me' ? '👤 Me' : '👥 Partner'}</p>
+                <p className="font-semibold text-foreground">{item.name}</p>
+                <p className="text-xs text-muted-foreground">{item.qty} {item.unit} • {item.description}</p>
               </div>
             </div>
           ))}

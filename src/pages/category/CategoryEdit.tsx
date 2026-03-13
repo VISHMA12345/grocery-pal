@@ -8,16 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { updateCategory } from '@/api/categoryApi';
 
 const iconOptions = ['🍎', '🥦', '🥛', '🍞', '🍫', '🥩', '🍚', '🧂', '🥕', '🍌', '🧀', '🍗', '🥚', '🍿', '🧈', '🌽', '🍇', '🥜', '🫘', '🍯'];
 
 const CategoryEdit = () => {
-  const { id } = useParams<{ id: string }>();
+  const { _id } = useParams<{ _id: string }>();
   const categories = useAppStore((s) => s.categories);
   const updateCat = useAppStore((s) => s.updateCategory);
   const navigate = useNavigate();
 
-  const category = categories.find((c) => c.id === id);
+  const category = categories.find((c) => c._id === _id);
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('🍎');
   const [description, setDescription] = useState('');
@@ -32,8 +33,9 @@ const CategoryEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !name) { toast.error('Name is required'); return; }
-    updateCat(id, { name, icon, description });
+    if (!_id || !name) { toast.error('Name is required'); return; }
+    updateCat(_id, { name, icon, description });
+    await updateCategory(_id, { name, icon, description });
     toast.success('Category updated!');
     navigate('/categories');
   };
