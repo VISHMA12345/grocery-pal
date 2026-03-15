@@ -32,7 +32,7 @@ export const partnerDetail = async (): Promise<{ data: Partner[] }> => {
   return response.data;
 };
 
-export const acceptPartner = async (requestId: string): Promise<any> => {
-  const response = await axiosClient.patch(`/partners/status/${requestId}`);
+export const acceptPartner = async (requestId: string, status: string): Promise<any> => {
+  const response = await axiosClient.patch(`/partners/status/${requestId}`, { status });
   return response.data;
 };    

@@ -9,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, X } from 'lucide-react';
-import { ProductDetail } from '@/api/groceryApi';
+import { ProductDetail, updateGroceryList as updateGroceryListApi } from '@/api/groceryApi';
+import { getCategories, Category } from '@/api/categoryApi';
+import { partnerDetail } from '@/api/partnerApi';
 
 const GroceryEdit = () => {
   const { _id } = useParams<{ _id: string }>();
-  const { groceryLists, products, setProducts, updateGroceryList } = useAppStore();
+  const { groceryLists, products, setProducts, updateGroceryList, user } = useAppStore();
   const navigate = useNavigate();
   const gl = groceryLists.find((g) => g._id === _id);
 
@@ -21,32 +23,60 @@ const GroceryEdit = () => {
   const [storeName, setStoreName] = useState('');
   const [items, setItems] = useState<ProductDetail[]>([]);
   const [selProduct, setSelProduct] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selCategory, setSelCategory] = useState<string>('all');
+  const [partners, setPartners] = useState<any[]>([]);
 
   useEffect(() => {
-    getProducts().then((res) => setProducts(res.data));
-  }, []);
+    getCategories().then((res) => setCategories(res.data));
+    partnerDetail().then((res) => {
+      const data = res.data || [];
+      const myId = user?._id;
+      const acceptedArray = data
+        .filter((item: any) => item.status === 'accepted')
+        .map((item: any) => {
+          const other = item.users?.find((u: any) => u._id !== myId);
+          return {
+            _id: other?._id,
+            name: other?.name,
+            email: other?.email,
+          };
+        });
+      setPartners(acceptedArray);
+    });
+  }, [user]);
 
   useEffect(() => {
-    if (gl) { setName(gl.listName); setStoreName(gl.storeName); setItems(gl.productDetails); }
+    const fetchProps = selCategory !== 'all' && selCategory !== '' ? { categoryId: selCategory } : undefined;
+    getProducts(fetchProps).then((res) => setProducts(res.data));
+  }, [selCategory]);
+
+  useEffect(() => {
+    if (gl) { setName(gl.listName); setStoreName(gl.storeName); setItems(gl.items || []); }
   }, [gl]);
 
   const addItem = () => {
     const prod = products.find((p) => p._id === selProduct);
     if (!prod) return;
-    if (items.find((i) => i._id === prod._id)) { toast.error('Already added'); return; }
-    setItems([...items, { _id: prod._id, name: prod.name, description: prod.description, images: [], qty: prod.qty, unit: prod.unit }]);
+    if (items.find((i) => i.productId === prod._id)) { toast.error('Already added'); return; }
+    setItems([...items, { productId: prod._id, name: prod.name, description: prod.description, images: [], quantity: prod.qty, unit: prod.unit, isCompleted: 0, assignedTo: '' }]);
     setSelProduct('');
   };
 
-  const removeItem = (pid: string) => setItems(items.filter((i) => i._id !== pid));
+  const removeItem = (pid: string) => setItems(items.filter((i) => i.productId !== pid));
   const updateItem = (pid: string, field: keyof ProductDetail, value: any) => {
-    setItems(items.map((i) => (i._id === pid ? { ...i, [field]: value } : i)));
+    setItems(items.map((i) => (i.productId === pid ? { ...i, [field]: value } : i)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!_id || !name) { toast.error('Name required'); return; }
-    updateGroceryList(_id, { listName: name, storeName: storeName, productDetails: items, itemCount: items.length });
+    updateGroceryList(_id, { listName: name, storeName: storeName, items: items, itemCount: items.length });
+    try {
+      await updateGroceryListApi(_id, { listName: name, storeName: storeName, items: items, itemCount: items.length });
+    } catch (err) {
+      console.error(err);
+    }
     toast.success('Grocery list updated!');
     navigate('/grocery-lists');
   };
@@ -66,6 +96,19 @@ const GroceryEdit = () => {
           </div>
           <div className="grocery-card space-y-4">
             <Label className="font-bold">Products</Label>
+
+            <div className="flex gap-2">
+              <Select value={selCategory} onValueChange={setSelCategory}>
+                <SelectTrigger className="flex-1"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex gap-2">
               <Select value={selProduct} onValueChange={setSelProduct}>
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Select product" /></SelectTrigger>
@@ -75,16 +118,23 @@ const GroceryEdit = () => {
             </div>
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item._id} className="bg-secondary rounded-xl p-3 space-y-2">
+                <div key={item.productId} className="bg-secondary rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-sm text-foreground">{item.name}</span>
-                    <button type="button" onClick={() => removeItem(item._id)} className="text-destructive"><X className="w-4 h-4" /></button>
+                    <button type="button" onClick={() => removeItem(item.productId)} className="text-destructive"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input type="number" value={item.qty} onChange={(e) => updateItem(item._id, 'qty', Number(e.target.value))} className="text-sm" />
-                    <Select value={item.unit} onValueChange={(v) => updateItem(item._id, 'unit', v)}>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Input type="number" value={item.quantity} onChange={(e) => updateItem(item.productId, 'quantity', Number(e.target.value))} className="text-sm" placeholder="Qty" />
+                    <Select value={item.unit} onValueChange={(v) => updateItem(item.productId, 'unit', v)}>
                       <SelectTrigger className="text-sm border-none bg-background/50"><SelectValue /></SelectTrigger>
                       <SelectContent>{['pcs', 'kg', 'ltr', 'bunch', 'loaf', 'pack'].map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={item.assignedTo || 'none'} onValueChange={(v) => updateItem(item.productId, 'assignedTo', v === 'none' ? undefined : v)}>
+                      <SelectTrigger className="text-sm border-none bg-background/50"><SelectValue placeholder="Assign To" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Unassigned</SelectItem>
+                        {partners.map(p => <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>)}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>

@@ -20,8 +20,8 @@ const dummyProducts: Product[] = [
   { _id: '6', name: 'Chicken Breast', categoryId: '6', description: 'Boneless chicken', qty: 1, unit: 'kg', price: 12.0 },
 ];
 
-export const getProducts = async (): Promise<{ data: Product[] }> => {
-  const res = await axiosClient.get('/products');
+export const getProducts = async (params?: { categoryId?: string }): Promise<{ data: Product[] }> => {
+  const res = await axiosClient.get('/products', { params });
   return res.data;
 };
 
