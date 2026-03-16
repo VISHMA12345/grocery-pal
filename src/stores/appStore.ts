@@ -92,7 +92,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((s) => ({
       baskets: s.baskets.map((b) =>
         b._id === basketId
-          ? { ...b, productDetails: b.productDetails.map((i) => (i._id === productId ? { ...i } : i)) }
+          ? { ...b, productDetails: b.productDetails.map((i) => (i.productId === productId ? { ...i } : i)) }
           : b
       ),
     })),

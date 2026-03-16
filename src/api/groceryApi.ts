@@ -7,13 +7,15 @@ export interface ProductImage {
 }
 
 export interface ProductDetail {
-  _id: string;
-  name: string;
-  description: string;
+  productId: string;
+  name?: string;
+  description?: string;
   images?: ProductImage[];
   price?: number;
-  qty: number;
+  quantity: number;
   unit: string;
+  assignedTo?: string;
+  isCompleted?: number;
   mrp?: number;
   stock?: number;
 }
@@ -24,7 +26,7 @@ export interface GroceryList {
   storeName: string;
   createdAt: string;
   itemCount: number;
-  productDetails: ProductDetail[];
+  items: ProductDetail[];
   converted_to_basket: boolean;
 }
 
@@ -32,17 +34,17 @@ const dummyLists: GroceryList[] = [
   {
     _id: '1', listName: 'Weekly Shopping', storeName: 'FreshMart',
     createdAt: new Date().toISOString(), itemCount: 2,
-    productDetails: [
-      { _id: '1', name: 'Apple', description: 'Fresh red apples', images: [], qty: 6, unit: 'pcs' },
-      { _id: '4', name: 'Milk', description: 'Whole milk', images: [], qty: 2, unit: 'ltr' },
+    items: [
+      { productId: '1', name: 'Apple', description: 'Fresh red apples', images: [], quantity: 6, unit: 'pcs' },
+      { productId: '4', name: 'Milk', description: 'Whole milk', images: [], quantity: 2, unit: 'ltr' },
     ],
     converted_to_basket: false,
   },
   {
     _id: '2', listName: 'Party Shopping', storeName: 'SuperStore',
     createdAt: new Date().toISOString(), itemCount: 1,
-    productDetails: [
-      { _id: '5', name: 'Bread', description: 'Whole wheat bread', images: [], qty: 3, unit: 'loaf' },
+    items: [
+      { productId: '5', name: 'Bread', description: 'Whole wheat bread', images: [], quantity: 3, unit: 'loaf' },
     ],
     converted_to_basket: false,
   },
