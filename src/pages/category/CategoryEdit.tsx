@@ -10,7 +10,9 @@ import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 import { updateCategory } from '@/api/categoryApi';
 
-const iconOptions = ['🍎', '🥦', '🥛', '🍞', '🍫', '🥩', '🍚', '🧂', '🥕', '🍌', '🧀', '🍗', '🥚', '🍿', '🧈', '🌽', '🍇', '🥜', '🫘', '🍯'];
+import { CATEGORY_ICONS } from '@/lib/constants';
+
+const iconOptions = CATEGORY_ICONS;
 
 const CategoryEdit = () => {
   const { _id } = useParams<{ _id: string }>();

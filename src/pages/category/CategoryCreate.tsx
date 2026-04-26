@@ -10,7 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 
-const iconOptions = ['🍎', '🥦', '🥛', '🍞', '🍫', '🥩', '🍚', '🧂', '🥕', '🍌', '🧀', '🍗', '🥚', '🍿', '🧈', '🌽', '🍇', '🥜', '🫘', '🍯'];
+import { CATEGORY_ICONS } from '@/lib/constants';
+
+const iconOptions = CATEGORY_ICONS;
 
 const CategoryCreate = () => {
   const [name, setName] = useState('');

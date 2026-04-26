@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: 'https://grocery-server-1-16fr.onrender.com/api',
+  // baseURL: 'https://grocery-server-1-16fr.onrender.com/api',//
+  baseURL: ' http://localhost:4000/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
